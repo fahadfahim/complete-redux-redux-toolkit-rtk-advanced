@@ -1,0 +1,1 @@
+component that are more for layout and not associated with posts 

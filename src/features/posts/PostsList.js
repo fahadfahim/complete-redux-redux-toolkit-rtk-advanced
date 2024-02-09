@@ -1,34 +1,35 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
-//to avoid state.posts we need to create look in the postslice
-import { selectAllPosts } from './postsSlice'
-import PostAuthor from './PostAuthor'
-import TimeAgo from './TimeAgo'
-import ReactionButton from './ReactionButton'
-const PostsList = () => {
-  const posts = useSelector(selectAllPosts)
-  //showing last posts at the beginning
-  //localcompare will return a negative one or a positive one or a zero based on one is greater than one the other
-  const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date));
+import { useSelector, useDispatch } from "react-redux";
+import { selectAllPosts, getPostsStatus, getPostsError, fetchPosts } from "./postsSlice";
+import { useEffect } from "react";
+import PostsExcerpt from "./PostsExcerpt";
 
-  const renderPosts = orderedPosts.map(post => (
-    <article key={post.id}>
-      <h2>{post.title}</h2>
-      <p>{post.content.substring(0, 100)}</p>
-      <div className='postCredit'>
-        <PostAuthor userId={post.userId} />
-        <TimeAgo timestamp={post.date} />
-        <ReactionButton post={post} />
-      </div>
-    </article>
-  ))
+const PostsList = () => {
+  const dispatch = useDispatch();
+
+  const posts = useSelector(selectAllPosts);
+  const postStatus = useSelector(getPostsStatus);
+  const error = useSelector(getPostsError);
+
+  useEffect(() => {
+    if (postStatus === 'idle') {
+      dispatch(fetchPosts())
+    }
+  }, [postStatus, dispatch])
+
+  let content;
+  if (postStatus === 'loading') {
+    content = <p>"Loading..."</p>;
+  } else if (postStatus === 'succeeded') {
+    const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
+    content = orderedPosts.map(post => <PostsExcerpt key={post.id} post={post} />)
+  } else if (postStatus === 'failed') {
+    content = <p>{error}</p>;
+  }
 
   return (
     <section>
-      <h2>Posts</h2>
-      {renderPosts}
+      {content}
     </section>
   )
 }
-
 export default PostsList
