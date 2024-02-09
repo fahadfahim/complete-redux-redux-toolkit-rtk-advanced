@@ -1,38 +1,46 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { postAdded } from './postsSlice'
+import { addNewPost, postAdded } from './postsSlice'
 import { selectAllUsers } from '../users/usersSlice'
+import { useNavigate } from 'react-router-dom'
 
 const AddPostForm = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
+  const [addRequestStatus, setAddRequestStatus] = useState('idle')
 
   const users = useSelector(selectAllUsers)
-
 
   const onTitleChanged = e => setTitle(e.target.value)
   const onContentChanged = e => setContent(e.target.value)
   const onAuthorChanged = e => setUserId(e.target.value)
 
+  const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+
   const onSavePostClicked = () => {
-    if (title && content) {
-      // dispatch(postAdded({
-      //   id: nanoid(),
-      //   title,
-      //   content,
-      // }))
-      //with prpare we don't need to format the data in the components
-      dispatch(postAdded(title, content, userId))
+    if (canSave) {
+      try {
+        setAddRequestStatus('pending')
+        //redux toolkit adds unwrap function to the returned promise and then that returns a new promise that either has the action payload or  it throws an error if it's rejected action 
+        dispatch(addNewPost({ title: title, body: content, userId })).unwrap()
+
+        setTitle('')
+        setContent('')
+        setUserId('')
+        navigate('/')
+      } catch (error) {
+        console.error('failed to save post', error)
+      } finally {
+        setAddRequestStatus('idle')
+      }
     }
-    setTitle('')
-    setContent('')
   }
 
   //we are essentially chcking to see title and content and userid are all true here
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
 
   const usersOptions = users.map(user => (
     <option key={user.id} value={user.id}>
