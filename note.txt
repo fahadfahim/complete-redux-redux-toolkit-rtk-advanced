@@ -1,1 +1,13 @@
 component that are more for layout and not associated with posts 
+====== STATE NORMALIZATION =====
+q1. what is state normalization ..??
+
+NORMALIZATION 
+--Recommended in docs for more
+--No duplication of data
+--Creates an ID lookup -- keeping the item in a lookup table by its ID normalize state comprised of an object with an ids array and then nested entities object that contains all of the items
+
+createEntityAdapter API 
+-Abstracts more logic from components 
+--built-in crud methods 
+--automatic selector generation
