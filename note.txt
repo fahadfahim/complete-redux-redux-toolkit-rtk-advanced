@@ -11,3 +11,7 @@ createEntityAdapter API
 -Abstracts more logic from components 
 --built-in crud methods 
 --automatic selector generation
+
+======installing json server=======
+npm i json-server -g
+json-server --watch data/db.json --port 3500
